@@ -22,6 +22,7 @@
 ## Cara Menjalankan
 
 1. **Clone repo & install dependencies**
+
    ```sh
    git clone https://github.com/anshorfalahi/JalaninAja.git
    cd JalaninAja
@@ -57,7 +58,7 @@ public/
 
 ## Catatan & Bug Diketahui
 
-- **BUG Marker Map:** Marker pada peta muncul di belakang bar pencarian dan tombol "Align Path to Road". Ini masalah z-index/urutan layer pada komponen Leaflet dan elemen custom di atas peta.
+- ~~**BUG Marker Map:** Marker pada peta muncul di belakang bar pencarian dan tombol "Align Path to Road". Ini masalah z-index/urutan layer pada komponen Leaflet dan elemen custom di atas peta.~~ **(SUDAH FIX)**
 - **Visual Masih Berantakan:** UI belum sepenuhnya rapi, terutama pada tampilan mobile dan beberapa elemen masih kurang konsisten.
 - **Fitur Heart Rate:** Opsi "Include Heart Rate Data" sudah ada, namun data HR pada GPX masih dummy/simulasi, belum ada input HR detail.
 - **Icon Masih Ngasal:** Icon pada beberapa tombol/statistik masih menggunakan SVG sederhana/buatan sendiri, belum konsisten atau sesuai standar.
@@ -89,16 +90,15 @@ public/
 - React 19
 - TailwindCSS
 - Leaflet & React-Leaflet
-- leaflet-geosearch
 - OSRM (untuk align path)
 - Recharts (visualisasi)
 - gpx-builder (generate file GPX)
+- Nominatim OpenStreetMap API (pencarian lokasi, menggantikan leaflet-geosearch)
 
 ---
 
 ## TODO / Pengembangan Selanjutnya
 
-- Perbaiki bug marker di peta (z-index/overlay)
 - Rapiin tampilan UI (mobile responsive, konsistensi warna/icon)
 - Fitur Heart Rate: input manual HR, visualisasi HR, export HR ke GPX lebih realistis
 - Customisasi icon dengan library icon profesional (misal Lucide, Feather, dsb)

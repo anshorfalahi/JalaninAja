@@ -21,50 +21,66 @@ function mphToKmh(mph) {
 }
 
 // ICON COMPONENTS
-function IconRunner({ color = "#f97316", size = 28 }) {
-  // Simple running man SVG (Lucide "run")
+// Icon Orang Lari (Google Material Icons - "directions_run")
+function IconRunner({ color = "#FC5200", size = 28 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="17" cy="4" r="2"/>
-      <path d="M4 17l5-5 1.5 1.5L12 12"/>
-      <path d="M15 7.13V12l-2.5 2.5"/>
-      <path d="M2 20l7-7 1.5 1.5"/>
-      <path d="M16 21v-2l-2-4 5-5"/>
+    <svg width={size} height={size} viewBox="0 0 512.149 512.149" fill={color} xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(-1)">
+        <path d="M504.427,111.44l-1.253-1.254c-11.776-11.776-30.967-11.802-42.814,0.035l-46.089,46.574
+        c-2.428,2.436-6.312,2.534-8.845,0.203l-64.618-59.657c-6.276-5.8-14.442-8.987-22.996-8.987h-96.124
+        c-2.269,0-4.44,0.865-6.082,2.419l-81.47,77.356c-11.935,11.944-12.756,31.197-1.818,42.92
+        c5.844,6.268,13.736,9.719,22.219,9.719h0.15c8.413-0.044,16.499-3.619,22.087-9.728l57.538-60.893h20.595L120.63,300.218H37.81
+        c-19.633,0-35.778,14.68-36.758,33.421c-0.521,9.79,2.904,19.094,9.64,26.191c6.638,7,15.969,11.008,25.618,11.008h123.586
+        c2.436,0,4.767-1.006,6.444-2.798l63.32-67.593l53.248,55.684l-16.075,102.735c-4.052,17.02,4.114,34.357,19.412,41.198
+        c4.714,2.119,9.719,3.178,14.698,3.178c5.358,0,10.69-1.227,15.598-3.655c9.481-4.696,16.296-13.285,18.776-23.967
+        l27.463-147.306c0.53-2.86-0.38-5.809-2.445-7.865l-73.295-73.198l58.227-58.138l40.589,40.58
+        c11.335,11.335,31.091,11.335,42.417,0l76.156-76.147c5.623-5.623,8.722-13.109,8.722-21.054
+        C513.149,124.54,510.05,117.063,504.427,111.44z" />
+        <path d="M407.065,114.837c29.211,0,52.966-23.755,52.966-52.966c0-29.211-23.755-52.966-52.966-52.966
+        c-29.21,0-52.966,23.755-52.966,52.966C354.1,91.082,377.855,114.837,407.065,114.837z" />
+      </g>
     </svg>
   );
 }
-function IconBike({ color = "#f97316", size = 28 }) {
-  // Simple bike SVG (Lucide "bike")
+
+// Icon Sepeda (Google Material Icons - "directions_bike")
+function IconBike({ color = "#FC5200", size = 28 }) {
   return (
-    <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
       <circle cx="5.5" cy="17.5" r="3.5" />
       <circle cx="18.5" cy="17.5" r="3.5" />
-      <path d="M12 17.5h-6m6 0l4.5-8.5m-4.5 8.5l-2.5-5m2.5 5v-5"/>
-      <path d="M13 5.5c1 0 2 1 2 2s-1 2-2 2-2-1-2-2 1-2 2-2z"/>
+      <path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5V14l-3-3 4-3 2 3h2" />
     </svg>
   );
 }
+
+// Icon Jarak (Feather Icons - "map")
 function IconDistance({ color = "#f97316", size = 28 }) {
   return (
-    <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24">
-      <path d="M3 12h18" />
-      <path d="M3 12l4-4m0 8l-4-4" />
+    <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+      <line x1="8" y1="2" x2="8" y2="18"></line>
+      <line x1="16" y1="6" x2="16" y2="22"></line>
     </svg>
   );
 }
+
+// Icon Durasi (Feather Icons - "clock")
 function IconDuration({ color = "#f97316", size = 28 }) {
   return (
-    <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="10"/>
-      <path d="M12 6v6l4 2"/>
+    <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <polyline points="12 6 12 12 16 14"></polyline>
     </svg>
   );
 }
+
+// Icon Ketinggian (Custom Mountain Icon)
 function IconElevation({ color = "#f97316", size = 28 }) {
   return (
-    <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24">
-      <path d="M3 17l6-6 4 4 8-8" />
-      <path d="M14 7h7v7" />
+    <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 20h18L14.93 5.43a2 2 0 00-3.86 0L3 20z"></path>
+      <path d="M9.5 12.5L12 9l4.5 7"></path>
     </svg>
   );
 }
@@ -204,33 +220,34 @@ export default function RunDetails({
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="bg-gray-50 rounded-xl p-4 mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex flex-col items-center">
-            <span className="mb-1"><IconDistance color="#f97316" size={28} /></span>
-            <span className="font-bold text-lg">{stats.distance ?? "0.00"} km</span>
-            <span className="text-xs text-gray-400">Distance</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="mb-1"><IconDuration color="#f97316" size={28} /></span>
-            <span className="font-bold text-lg">{stats.duration ?? "00:00"}</span>
-            <span className="text-xs text-gray-400">Duration</span>
-          </div>
+     {/* Stats */}
+      <div className="grid grid-cols-2 gap-y-4 gap-x-2 bg-gray-50 rounded-xl p-4 mb-4">
+        {/* Distance */}
+        <div className="flex flex-col items-center justify-center">
+          <span className="mb-1"><IconDistance color="#f97316" size={28} /></span>
+          <span className="font-bold text-lg">{stats.distance ?? "0.00"} km</span>
+          <span className="text-xs text-gray-400">Distance</span>
         </div>
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col items-center">
-            <span className="mb-1"><IconElevation color="#f97316" size={28} /></span>
-            <span className="font-bold text-lg">{stats.elevation ?? "0"}m</span>
-            <span className="text-xs text-gray-400">Elevation Gain</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="mb-1"><PaceIcon color="#f97316" size={28} /></span>
-            <span className="font-bold text-lg">
-              {displayPace.toFixed(2)} {paceStat}
-            </span>
-            <span className="text-xs text-gray-400">{paceStat}</span>
-          </div>
+        {/* Duration */}
+        <div className="flex flex-col items-center justify-center">
+          <span className="mb-1"><IconDuration color="#f97316" size={28} /></span>
+          <span className="font-bold text-lg">{stats.duration ?? "00:00:00"}</span>
+          <span className="text-xs text-gray-400">Duration</span>
+        </div>
+        {/* Elevation */}
+        <div className="flex flex-col items-center justify-center">
+          <span className="mb-1"><IconElevation color="#f97316" size={28} /></span>
+          <span className="font-bold text-lg">{stats.elevation ?? "0"}m</span>
+          <span className="text-xs text-gray-400">Elevation Gain</span>
+        </div>
+        {/* Pace/Speed */}
+        <div className="flex flex-col items-center justify-center">
+          <span className="mb-1"><PaceIcon color="#f97316" size={28} /></span>
+          <span className="font-bold text-lg">
+            {displayPace.toFixed(2)}
+          </span>
+          {/* Menggunakan label yang lebih deskriptif */}
+          <span className="text-xs text-gray-400">{paceUnit}</span>
         </div>
       </div>
 

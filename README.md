@@ -58,11 +58,10 @@ public/
 
 ## Catatan & Bug Diketahui
 
-- ~~**BUG Marker Map:** Marker pada peta muncul di belakang bar pencarian dan tombol "Align Path to Road". Ini masalah z-index/urutan layer pada komponen Leaflet dan elemen custom di atas peta.~~ **(SUDAH FIX)**
-- **Visual Masih Berantakan:** UI belum sepenuhnya rapi, terutama pada tampilan mobile dan beberapa elemen masih kurang konsisten.
-- **Fitur Heart Rate:** Opsi "Include Heart Rate Data" sudah ada, namun data HR pada GPX masih dummy/simulasi, belum ada input HR detail.
-- **Icon Masih Ngasal:** Icon pada beberapa tombol/statistik masih menggunakan SVG sederhana/buatan sendiri, belum konsisten atau sesuai standar.
-- **Dibuat Full Bantuan GPT:** Seluruh kode, logika, dan dokumentasi dibuat dengan bantuan AI (GPT).
+- **Tampilan UI:** Masih perlu perbaikan untuk responsif dan konsistensi.
+- **Pace Inconsistency:** Simulasi variasi pace masih sederhana, belum ada algoritma kompleks.
+- **Heart Rate Variability:** Fitur ini masih belum sempurna hasilnya.
+- **Align Path ke Jalan:** Fitur align path ke jalan menggunakan OSRM masih dalam tahap eksperimen, mungkin tidak selalu akurat.
 
 ---
 
@@ -100,9 +99,7 @@ public/
 ## TODO / Pengembangan Selanjutnya
 
 - Rapiin tampilan UI (mobile responsive, konsistensi warna/icon)
-- Fitur Heart Rate: input manual HR, visualisasi HR, export HR ke GPX lebih realistis
-- Customisasi icon dengan library icon profesional (misal Lucide, Feather, dsb)
-- Simulasi data pace/elevasi berdasarkan rute asli, bukan dummy
+- Implementasi algoritma pace inconsistency yang lebih kompleks
 
 ---
 

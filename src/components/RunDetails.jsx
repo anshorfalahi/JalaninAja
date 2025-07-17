@@ -96,6 +96,24 @@ function getPaceLabel(val) {
   return paceOptions.find(opt => val <= opt.max)?.label || paceOptions[paceOptions.length - 1].label;
 }
 
+// HR descriptions
+const hrIntensityLabels = [
+  { max: 120, label: "Light intensity, easy effort" },
+  { max: 160, label: "Moderate intensity, steady effort" },
+  { max: 220, label: "Maximum intensity, very hard effort" },
+];
+function getHrIntensityLabel(val) {
+  return hrIntensityLabels.find(opt => val <= opt.max)?.label || hrIntensityLabels[hrIntensityLabels.length - 1].label;
+}
+const hrVariabilityLabels = [
+  { max: 5, label: "Minimal heart rate changes (steady state)" },
+  { max: 15, label: "Moderate heart rate changes (realistic for varied terrain)" },
+  { max: 30, label: "High heart rate variability (intervals or challenging terrain)" },
+];
+function getHrVariabilityLabel(val) {
+    return hrVariabilityLabels.find(opt => val <= opt.max)?.label || hrVariabilityLabels[hrVariabilityLabels.length - 1].label;
+}
+
 const RUN_PACE_UNITS = [
   { value: "min/km", label: "min/km" },
   { value: "min/mile", label: "min/mile" },
@@ -112,6 +130,8 @@ export default function RunDetails({
   paceUnit, setPaceUnit,
   paceInconsistency, setPaceInconsistency,
   includeHR, setIncludeHR,
+  avgHR, setAvgHR,
+  hrVariation, setHrVariation,
   runData, setRunData,
 }) {
   // Handle label, range, and conversion
@@ -286,7 +306,7 @@ export default function RunDetails({
       {/* Pace Inconsistency */}
       <div className="flex items-center mt-4 mb-1">
         <span className="text-orange-500 mr-2">
-          <svg width="18" height="18" fill="currentColor"><circle cx="9" cy="9" r="9" /></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
         </span>
         <span className="font-medium mr-2">Pace Inconsistency</span>
         <span className="ml-auto text-orange-500 font-bold">{paceInconsistency}%</span>
@@ -315,6 +335,48 @@ export default function RunDetails({
           <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-orange-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
         </label>
       </div>
+
+      {includeHR && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          {/* Average Heart Rate */}
+          <div className="flex items-center mt-4 mb-1">
+            <span className="text-orange-500 mr-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+            </span>
+            <span className="font-medium mr-2">Average Heart Rate</span>
+            <span className="ml-auto text-orange-500 font-bold">{avgHR} bpm</span>
+          </div>
+          <input
+            type="range"
+            min={80}
+            max={220}
+            step={1}
+            value={avgHR}
+            onChange={e => setAvgHR(parseInt(e.target.value))}
+            className="w-full accent-orange-500"
+          />
+          <div className="text-xs text-gray-400 mb-2">{getHrIntensityLabel(avgHR)}</div>
+
+          {/* Heart Rate Variability */}
+          <div className="flex items-center mt-4 mb-1">
+            <span className="text-orange-500 mr-2">
+             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </span>
+            <span className="font-medium mr-2">Heart Rate Variability</span>
+            <span className="ml-auto text-orange-500 font-bold">{hrVariation}%</span>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={30}
+            step={1}
+            value={hrVariation}
+            onChange={e => setHrVariation(parseInt(e.target.value))}
+            className="w-full accent-orange-500"
+          />
+          <div className="text-xs text-gray-400 mb-2">{getHrVariabilityLabel(hrVariation)}</div>
+        </div>
+      )}
 
       {/* Run/Ride Name */}
       <label className="font-medium text-sm mt-2 block">

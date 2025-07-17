@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import RunDetails from "./components/RunDetails";
 import MapRoute from "./components/MapRoute";
 import DownloadGPX from "./components/DownloadGPX";
@@ -58,27 +58,6 @@ function getDurationFromPaceAndDistance(pace, distance, type, paceUnit) {
   }
 }
 
-const dummyPaceData = {
-  avg: 5.5,
-  chartData: [
-    { distance: 0, pace: 7 },
-    { distance: 0.2, pace: 4 },
-    { distance: 0.4, pace: 3.3 },
-    { distance: 0.6, pace: 3.6 },
-    { distance: 0.8, pace: 4.2 },
-  ]
-};
-const dummyElevationData = {
-  totalGain: 8,
-  chartData: [
-    { distance: 0, elevation: 62 },
-    { distance: 0.2, elevation: 61 },
-    { distance: 0.4, elevation: 59 },
-    { distance: 0.6, elevation: 67 },
-    { distance: 0.8, elevation: 62 },
-  ]
-};
-
 export default function App() {
   const [type, setType] = useState("run");
   const [averagePace, setAveragePace] = useState(5.5);
@@ -91,25 +70,118 @@ export default function App() {
     time: "06:30",
     description: "",
   });
-
   const [route, setRoute] = useState([]);
+
+  // States for HR and visualization data
+  const [avgHR, setAvgHR] = useState(150);
+  const [hrVariation, setHrVariation] = useState(7);
+  const [paceData, setPaceData] = useState({ avg: 0, chartData: [] });
+  const [elevationData, setElevationData] = useState({ totalGain: 0, chartData: [] });
+  const [hrData, setHrData] = useState({ avg: 0, chartData: [] });
 
   // Calculate stats (otomatis dari route)
   const distance = getTotalDistance(route);
   const elevationArr = getSimulatedElevationArr(route);
   const elevation = getTotalElevationGain(elevationArr);
   const duration = getDurationFromPaceAndDistance(averagePace, distance, type, paceUnit);
-
   const stats = { distance: distance.toFixed(2), duration, elevation };
 
-  React.useEffect(() => {
-    if (type === "run" && paceUnit !== "min/km" && paceUnit !== "min/mile") setPaceUnit("min/km");
-    if (type === "bike" && paceUnit !== "km/h" && paceUnit !== "mph") setPaceUnit("km/h");
-  }, [type]); // eslint-disable-line
+  useEffect(() => {
+    if (type === "run" && paceUnit !== "min/km" && paceUnit !== "min/mile") {
+      setPaceUnit("min/km");
+    }
+    if (type === "ride" && paceUnit !== "km/h" && paceUnit !== "mph") {
+      setPaceUnit("km/h");
+    }
+  }, [type, paceUnit]);
+
+  // Generate real-time data for visualization
+  useEffect(() => {
+    if (route.length < 2) {
+      setPaceData({ avg: 0, chartData: [] });
+      setElevationData({ totalGain: 0, chartData: [] });
+      setHrData({ avg: 0, chartData: [] });
+      return;
+    }
+
+    // First pass: Calculate distance and a random elevation profile
+    let cumulativeDistance = 0;
+    const elevationProfile = route.map((point, i) => {
+        if (i > 0) {
+            cumulativeDistance += getDistanceMeters(route[i-1], point) / 1000;
+        }
+        const randomElevationFactor = (Math.sin(i / 12) * 0.6) + (Math.sin(i/5) * 0.4) + ((Math.random() - 0.5) * 0.2);
+        const elevation = 40 + (randomElevationFactor * 30);
+        return {
+            distance: parseFloat(cumulativeDistance.toFixed(2)),
+            elevation: parseFloat(elevation.toFixed(2))
+        };
+    });
+
+    // Second pass: Calculate gradient and correlate pace and HR
+    let smoothedHR = avgHR;
+    const hrInertiaFactor = 0.1; 
+
+    const finalChartData = elevationProfile.map((dataPoint, i) => {
+        let gradient = 0;
+        if (i > 0) {
+            const eleDiff = dataPoint.elevation - elevationProfile[i - 1].elevation;
+            const distDiff = (dataPoint.distance - elevationProfile[i - 1].distance) * 1000;
+            if (distDiff > 0) {
+                gradient = (eleDiff / distDiff) * 100;
+            }
+        }
+
+        // --- Simulate Pace ---
+        let currentPace = averagePace;
+        const inconsistencyFactor = paceInconsistency / 50.0; // Scale from 0 to 1
+
+        if (inconsistencyFactor > 0) {
+            const gradientPaceEffect = (gradient > 0 ? (gradient * 0.2) : (gradient * 0.1)) * inconsistencyFactor;
+            
+            const randomInconsistencyEffect = (averagePace * inconsistencyFactor) * (Math.sin(i / 15) * 0.5 + Math.sin(i/5) * 0.5) * 0.5;
+
+            currentPace += gradientPaceEffect + randomInconsistencyEffect;
+        }
+        
+        // Widen the clamp to allow for variations at extreme average paces
+        currentPace = Math.max(2.5, Math.min(25.0, currentPace));
+
+        // --- Simulate HR with Inertia (Always affected by gradient) ---
+        const gradientHrEffect = gradient > 0 ? (gradient * 3.5) : (gradient * 0.5);
+        const hrVariabilityFactor = hrVariation / 100;
+        const randomHrNoise = (Math.random() - 0.5) * 3 * (1 + hrVariabilityFactor);
+        
+        const targetHR = avgHR + gradientHrEffect + randomHrNoise;
+        smoothedHR += (targetHR - smoothedHR) * hrInertiaFactor;
+
+        const hrMax = avgHR * (1 + hrVariabilityFactor * 1.5);
+        const hrMin = avgHR * (1 - hrVariabilityFactor);
+        const currentHR = Math.round(Math.max(hrMin, Math.min(hrMax, smoothedHR)));
+
+
+        return {
+            ...dataPoint,
+            pace: parseFloat(currentPace.toFixed(2)),
+            hr: currentHR
+        };
+    });
+    
+    const totalGain = getTotalElevationGain(finalChartData.map(d => d.elevation));
+
+    setPaceData({ avg: averagePace, chartData: finalChartData });
+    setElevationData({ totalGain: totalGain, chartData: finalChartData });
+    if (includeHR) {
+      setHrData({ avg: avgHR, chartData: finalChartData });
+    } else {
+      setHrData({ avg: 0, chartData: [] });
+    }
+  }, [route, averagePace, paceInconsistency, avgHR, hrVariation, includeHR, type, paceUnit]);
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen">
-      <div className="w-full md:w-[400px] xl:w-[430px] bg-white p-6 shadow-lg">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <div className="w-full md:w-[400px] xl:w-[430px] bg-white p-6 shadow-lg overflow-y-auto">
         <RunDetails
           type={type}
           setType={setType}
@@ -122,14 +194,27 @@ export default function App() {
           setPaceInconsistency={setPaceInconsistency}
           includeHR={includeHR}
           setIncludeHR={setIncludeHR}
+          avgHR={avgHR}
+          setAvgHR={setAvgHR}
+          hrVariation={hrVariation}
+          setHrVariation={setHrVariation}
           runData={runData}
           setRunData={setRunData}
         />
-        <DownloadGPX runData={{ ...runData, pace: averagePace, paceUnit, includeHR }} route={route} />
-        <DataVisualization paceData={dummyPaceData} elevationData={dummyElevationData} />
+        <DownloadGPX runData={{ ...runData, pace: averagePace, paceUnit, includeHR, avgHR, hrVariation }} route={route} type={type} />
       </div>
-      <div className="w-full md:flex-1 h-[600px] md:h-screen">
-        <MapRoute route={route} setRoute={setRoute} />
+
+      {/* Main Content (Map + Visualization) */}
+      <div className="w-full md:flex-1 flex flex-col">
+        {/* Map Container */}
+        <div className="h-[60vh]">
+          <MapRoute route={route} setRoute={setRoute} />
+        </div>
+
+        {/* Data Visualization Container */}
+        <div className="flex-1 p-4 overflow-y-auto">
+          <DataVisualization paceData={paceData} elevationData={elevationData} hrData={hrData} />
+        </div>
       </div>
     </div>
   );

@@ -60,6 +60,9 @@ export default function App() {
   const [paceInconsistency, setPaceInconsistency] = useState(0);
   const [includeHR, setIncludeHR] = useState(false);
 
+  const [avgHR, setAvgHR] = useState(150);
+  const [hrVariation, setHrVariation] = useState(7);
+
   const [runData, setRunData] = useState({
     name: "Morning Run",
     date: new Date().toISOString().slice(0, 10),
@@ -97,10 +100,15 @@ export default function App() {
           setPaceInconsistency={setPaceInconsistency}
           includeHR={includeHR}
           setIncludeHR={setIncludeHR}
+          avgHR={avgHR}
+          setAvgHR={setAvgHR}
+          hrVariation={hrVariation}
+          setHrVariation={setHrVariation}
           runData={runData}
           setRunData={setRunData}
         />
-        <DownloadGPX runData={{ ...runData, pace: averagePace, paceUnit, includeHR }} route={route} />
+        <DownloadGPX runData={{ ...runData, pace: averagePace, paceUnit, includeHR, avgHR, hrVariation }} route={route} type={type} />
+        {/* Data visualization can be added here */}
       </div>
       <div className="w-full md:w-2/3 h-[500px] md:h-screen">
         <MapRoute route={route} setRoute={setRoute} />

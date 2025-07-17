@@ -32,7 +32,7 @@ export function buildGPXFile(runData, route, type = "run") {
   // HR config
   const includeHR = !!runData.includeHR;
   const avgHR = runData.avgHR ? parseInt(runData.avgHR) : 150;
-  const hrVariation = 7;
+  const hrVariation = runData.hrVariation !== undefined ? parseInt(runData.hrVariation) : 7;
 
   let pointsXml = "";
   for (let i = 0; i < interpolatedRoute.length; i++) {
@@ -42,7 +42,8 @@ export function buildGPXFile(runData, route, type = "run") {
 
     let hrVal = avgHR;
     if (includeHR) {
-      hrVal = avgHR + Math.round(hrVariation * Math.sin(i / 8));
+      const variation = Math.round((avgHR * hrVariation / 100) * Math.sin(i / 8));
+      hrVal = avgHR + variation;
     }
 
     pointsXml += `

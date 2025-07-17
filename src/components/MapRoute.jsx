@@ -99,15 +99,16 @@ function SearchBarWithButtons({ setRoute, aligning, onAlign, onClear, disableAli
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 1002,
-        width: "900px",
-        maxWidth: "98vw",
+        width: "90%",
+        maxWidth: "900px",
         display: "flex",
+        flexWrap: "wrap",
         alignItems: "center",
         gap: 10,
         pointerEvents: "auto"
       }}
     >
-      <div style={{ flex: 1, position: "relative", display: "flex", gap: 6 }}>
+      <div style={{ flex: 1, minWidth: '200px', position: "relative", display: "flex", gap: 6 }}>
         <input
           ref={inputRef}
           type="text"
@@ -269,4 +270,3 @@ export default function MapRoute({ route, setRoute }) {
 );
 
 }
-

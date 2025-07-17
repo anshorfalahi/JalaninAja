@@ -179,9 +179,9 @@ export default function App() {
   }, [route, averagePace, paceInconsistency, avgHR, hrVariation, includeHR, type, paceUnit]);
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+    <div className="app-container">
       {/* Sidebar */}
-      <div className="w-full md:w-[400px] xl:w-[430px] bg-white p-6 shadow-lg overflow-y-auto">
+      <div className="sidebar">
         <RunDetails
           type={type}
           setType={setType}
@@ -205,14 +205,14 @@ export default function App() {
       </div>
 
       {/* Main Content (Map + Visualization) */}
-      <div className="w-full md:flex-1 flex flex-col">
+      <div className="main-content">
         {/* Map Container */}
-        <div className="h-[60vh]">
+        <div className="map-container-wrapper">
           <MapRoute route={route} setRoute={setRoute} />
         </div>
 
         {/* Data Visualization Container */}
-        <div className="flex-1 p-4 overflow-y-auto">
+        <div className="visualization-container">
           <DataVisualization paceData={paceData} elevationData={elevationData} hrData={hrData} />
         </div>
       </div>

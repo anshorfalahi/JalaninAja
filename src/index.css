@@ -1,3 +1,64 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Basic Layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.sidebar {
+  background-color: white;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.map-container-wrapper {
+  height: 60vh;
+}
+
+.visualization-container {
+  flex-grow: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .app-container {
+    flex-direction: row;
+  }
+
+  .sidebar {
+    width: 400px;
+    overflow-y: auto;
+  }
+
+  .main-content {
+    width: calc(100% - 400px);
+  }
+
+  .map-container-wrapper {
+    height: 60vh;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1280px) {
+  .sidebar {
+    width: 430px;
+  }
+
+  .main-content {
+    width: calc(100% - 430px);
+  }
+}

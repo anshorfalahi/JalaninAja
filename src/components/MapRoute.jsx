@@ -83,8 +83,11 @@ function SearchBarWithButtons({ setRoute, aligning, onAlign, onClear, disableAli
     }
   };
 
-  // Handle clear search button click
-  const onClearSearch = (e) => {
+  // Handle clear all button click
+  const handleClearAll = () => {
+    // Clear markers from the map by calling parent's onClear
+    onClear(); 
+    // Clear search suggestions and input field
     setSuggestions([]);
     setShowSug(false);
     if (inputRef.current) inputRef.current.value = "";
@@ -99,16 +102,15 @@ function SearchBarWithButtons({ setRoute, aligning, onAlign, onClear, disableAli
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 1002,
-        width: "90%",
-        maxWidth: "900px",
+        width: "900px",
+        maxWidth: "98vw",
         display: "flex",
-        flexWrap: "wrap",
         alignItems: "center",
         gap: 10,
         pointerEvents: "auto"
       }}
     >
-      <div style={{ flex: 1, minWidth: '200px', position: "relative", display: "flex", gap: 6 }}>
+      <div style={{ flex: 1, position: "relative", display: "flex", gap: 6 }}>
         <input
           ref={inputRef}
           type="text"
@@ -128,14 +130,6 @@ function SearchBarWithButtons({ setRoute, aligning, onAlign, onClear, disableAli
         >
           {searching ? "..." : "Search"}
         </button>
-        <button
-          className="font-semibold rounded-lg shadow bg-gray-200 text-orange-500 border border-orange-200 hover:bg-gray-300 transition-all"
-          style={{ minWidth: 120, height: 44, flex: 0 }}
-          onClick={onClearSearch}
-          type="button"
-        >
-          Clear Search
-        </button>
         {/* Suggestions dropdown */}
         {showSug && suggestions.length > 0 && (
           <div
@@ -147,7 +141,7 @@ function SearchBarWithButtons({ setRoute, aligning, onAlign, onClear, disableAli
               maxHeight: 180,
               overflowY: "auto",
               position: "absolute",
-              width: "calc(100% - 220px)", // Adjust width to match input field area
+              width: "calc(100% - 96px)", // Adjust width to match input field area
               zIndex: 1001,
               boxShadow: "0 4px 12px rgba(0,0,0,0.12)"
             }}
@@ -184,9 +178,9 @@ function SearchBarWithButtons({ setRoute, aligning, onAlign, onClear, disableAli
       <button
         className="transition-all px-4 py-2 font-semibold rounded-lg shadow bg-gray-100 text-orange-500 border border-orange-200 hover:bg-gray-100"
         style={{ minWidth: 120, height: 44 }}
-        onClick={onClear}
+        onClick={handleClearAll}
       >
-        Clear Marker
+        Clear All
       </button>
     </div>
   );

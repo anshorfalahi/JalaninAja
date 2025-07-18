@@ -15,6 +15,31 @@ function getDistanceMeters(a, b) {
   const y = dLat;
   return Math.sqrt(x * x + y * y) * R;
 }
+
+// Fungsi untuk memadatkan rute dengan titik-titik perantara
+function interpolateRoute(route, stepMeter = 20) {
+  if (route.length < 2) return route;
+  
+  const newRoute = [];
+  newRoute.push(route[0]);
+
+  for (let i = 0; i < route.length - 1; i++) {
+    const startPoint = route[i];
+    const endPoint = route[i+1];
+    const distance = getDistanceMeters(startPoint, endPoint);
+    
+    const numSegments = Math.max(1, Math.floor(distance / stepMeter));
+
+    for (let j = 1; j <= numSegments; j++) {
+      const ratio = j / numSegments;
+      const lat = startPoint[0] + (endPoint[0] - startPoint[0]) * ratio;
+      const lon = startPoint[1] + (endPoint[1] - startPoint[1]) * ratio;
+      newRoute.push([lat, lon]);
+    }
+  }
+  return newRoute;
+}
+
 // Total distance (km)
 function getTotalDistance(route) {
   let dist = 0;
@@ -22,10 +47,6 @@ function getTotalDistance(route) {
     dist += getDistanceMeters(route[i - 1], route[i]);
   }
   return dist / 1000;
-}
-// Simulasi elevation array
-function getSimulatedElevationArr(route) {
-  return route.map((_, i) => 15 + Math.sin(i / 3) * 6); // meter, just for display
 }
 function getTotalElevationGain(elevArr) {
   let gain = 0;
@@ -79,12 +100,11 @@ export default function App() {
   const [elevationData, setElevationData] = useState({ totalGain: 0, chartData: [] });
   const [hrData, setHrData] = useState({ avg: 0, chartData: [] });
 
-  // Calculate stats (otomatis dari route)
   const distance = getTotalDistance(route);
-  const elevationArr = getSimulatedElevationArr(route);
-  const elevation = getTotalElevationGain(elevationArr);
   const duration = getDurationFromPaceAndDistance(averagePace, distance, type, paceUnit);
-  const stats = { distance: distance.toFixed(2), duration, elevation };
+  // Elevation di-generate di useEffect
+  const stats = { distance: distance.toFixed(2), duration, elevation: elevationData.totalGain };
+
 
   useEffect(() => {
     if (type === "run" && paceUnit !== "min/km" && paceUnit !== "min/mile") {
@@ -103,26 +123,28 @@ export default function App() {
       setHrData({ avg: 0, chartData: [] });
       return;
     }
+    
+    const interpolatedRoute = interpolateRoute(route, 20);
 
-    // First pass: Calculate distance and a random elevation profile
     let cumulativeDistance = 0;
-    const elevationProfile = route.map((point, i) => {
+    const elevationProfile = interpolatedRoute.map((point, i) => {
         if (i > 0) {
-            cumulativeDistance += getDistanceMeters(route[i-1], point) / 1000;
+            cumulativeDistance += getDistanceMeters(interpolatedRoute[i - 1], point) / 1000;
         }
-        const randomElevationFactor = (Math.sin(i / 12) * 0.6) + (Math.sin(i/5) * 0.4) + ((Math.random() - 0.5) * 0.2);
-        const elevation = 40 + (randomElevationFactor * 30);
+        const elevation = 40 + (Math.sin(i / 25) * 15) + (Math.sin(i / 8) * 5) + ((Math.random() - 0.5) * 2);
         return {
             distance: parseFloat(cumulativeDistance.toFixed(2)),
             elevation: parseFloat(elevation.toFixed(2))
         };
     });
+    const totalGain = getTotalElevationGain(elevationProfile.map(d => d.elevation));
+    setElevationData({ totalGain: totalGain, chartData: elevationProfile });
 
-    // Second pass: Calculate gradient and correlate pace and HR
     let smoothedHR = avgHR;
-    const hrInertiaFactor = 0.1; 
+    const hrInertiaFactor = 0.1;
 
-    const finalChartData = elevationProfile.map((dataPoint, i) => {
+    // Tahap 1: Buat data kecepatan yang "berisik"
+    const noisyChartData = elevationProfile.map((dataPoint, i) => {
         let gradient = 0;
         if (i > 0) {
             const eleDiff = dataPoint.elevation - elevationProfile[i - 1].elevation;
@@ -131,46 +153,51 @@ export default function App() {
                 gradient = (eleDiff / distDiff) * 100;
             }
         }
-
-        // --- Simulate Pace ---
         let currentPace = averagePace;
-        const inconsistencyFactor = paceInconsistency / 50.0; // Scale from 0 to 1
-
-        if (inconsistencyFactor > 0) {
-            const gradientPaceEffect = (gradient > 0 ? (gradient * 0.2) : (gradient * 0.1)) * inconsistencyFactor;
-            
-            const randomInconsistencyEffect = (averagePace * inconsistencyFactor) * (Math.sin(i / 15) * 0.5 + Math.sin(i/5) * 0.5) * 0.5;
-
+        const inconsistencyValue = paceInconsistency / 100.0;
+        if (inconsistencyValue > 0) {
+            const gradientPaceEffect = (gradient * 0.1); 
+            const randomNoise = (Math.random() - 0.5) * 2; 
+            const randomInconsistencyEffect = averagePace * inconsistencyValue * 0.5 * randomNoise;
             currentPace += gradientPaceEffect + randomInconsistencyEffect;
         }
-        
-        // Widen the clamp to allow for variations at extreme average paces
         currentPace = Math.max(2.5, Math.min(25.0, currentPace));
+        return { ...dataPoint, pace: currentPace };
+    });
 
-        // --- Simulate HR with Inertia (Always affected by gradient) ---
-        const gradientHrEffect = gradient > 0 ? (gradient * 3.5) : (gradient * 0.5);
+    // Tahap 2: Haluskan data kecepatan yang berisik menggunakan moving average
+    const noisyPaceValues = noisyChartData.map(d => d.pace);
+    const smoothingWindow = 7; // Angka ganjil lebih baik, bisa diubah untuk tingkat kehalusan
+    const smoothedPaceValues = [];
+
+    for (let i = 0; i < noisyPaceValues.length; i++) {
+        const start = Math.max(0, i - Math.floor(smoothingWindow / 2));
+        const end = Math.min(noisyPaceValues.length, i + Math.floor(smoothingWindow / 2) + 1);
+        let sum = 0;
+        for (let j = start; j < end; j++) {
+            sum += noisyPaceValues[j];
+        }
+        smoothedPaceValues.push(sum / (end - start));
+    }
+
+    // Tahap 3: Gabungkan data yang sudah dihaluskan kembali ke data final
+    const finalChartData = noisyChartData.map((dataPoint, i) => {
+        // Kalkulasi HR (bisa tetap di sini)
+        const gradientHrEffect = 0; // Efek gradien pada HR bisa ditambahkan jika perlu
         const hrVariabilityFactor = hrVariation / 100;
         const randomHrNoise = (Math.random() - 0.5) * 3 * (1 + hrVariabilityFactor);
-        
         const targetHR = avgHR + gradientHrEffect + randomHrNoise;
         smoothedHR += (targetHR - smoothedHR) * hrInertiaFactor;
-
-        const hrMax = avgHR * (1 + hrVariabilityFactor * 1.5);
-        const hrMin = avgHR * (1 - hrVariabilityFactor);
-        const currentHR = Math.round(Math.max(hrMin, Math.min(hrMax, smoothedHR)));
-
+        const currentHR = Math.round(Math.max(avgHR * 0.7, Math.min(avgHR * 1.3, smoothedHR)));
 
         return {
-            ...dataPoint,
-            pace: parseFloat(currentPace.toFixed(2)),
-            hr: currentHR
+          ...dataPoint,
+          pace: parseFloat(smoothedPaceValues[i].toFixed(2)),
+          hr: currentHR
         };
     });
     
-    const totalGain = getTotalElevationGain(finalChartData.map(d => d.elevation));
-
     setPaceData({ avg: averagePace, chartData: finalChartData });
-    setElevationData({ totalGain: totalGain, chartData: finalChartData });
     if (includeHR) {
       setHrData({ avg: avgHR, chartData: finalChartData });
     } else {
@@ -180,7 +207,6 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* Sidebar */}
       <div className="sidebar">
         <RunDetails
           type={type}
@@ -203,15 +229,10 @@ export default function App() {
         />
         <DownloadGPX runData={{ ...runData, pace: averagePace, paceUnit, includeHR, avgHR, hrVariation }} route={route} type={type} />
       </div>
-
-      {/* Main Content (Map + Visualization) */}
       <div className="main-content">
-        {/* Map Container */}
         <div className="map-container-wrapper">
           <MapRoute route={route} setRoute={setRoute} />
         </div>
-
-        {/* Data Visualization Container */}
         <div className="visualization-container">
           <DataVisualization paceData={paceData} elevationData={elevationData} hrData={hrData} />
         </div>

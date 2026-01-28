@@ -14,6 +14,7 @@ export function buildGPXFile(runData, route, type = "run") {
 
   // Fix 3: Improve name fallback to include date so it's not just "Run"
   const name = runData.name || (type === "run" ? `Run ${date}` : `Ride ${date}`);
+  const description = runData.description || "";
 
   let pace = parseFloat(runData.pace);
   let paceUnit = runData.paceUnit || (type === "run" ? "min/km" : "km/h");
@@ -80,7 +81,7 @@ export function buildGPXFile(runData, route, type = "run") {
   const gpx =
     `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1"
-     creator="GPX Generator"
+     creator="StravaGPX"
      xmlns="http://www.topografix.com/GPX/1/1"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
@@ -90,12 +91,13 @@ export function buildGPXFile(runData, route, type = "run") {
      http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd">
   <metadata>
     <name>${escapeXml(name)}</name>
-    <desc>${escapeXml(runData.description || "")}</desc>
+    <desc>${escapeXml(description)}</desc>
     <time>${startDateTime.toISOString()}</time>
   </metadata>
   <trk>
     <name>${escapeXml(name)}</name>
-    <type>${type === "run" ? "Run" : "Ride"}</type>
+    <desc>${escapeXml(description)}</desc>
+    <type>${type === "run" ? "running" : "cycling"}</type>
     <trkseg>
       ${pointsXml}
     </trkseg>

@@ -78,10 +78,11 @@ export function buildGPXFile(runData, route, type = "run") {
       </trkpt>`;
   }
 
+  // Attempt to look like Garmin Connect to get Strava to respect the file more
   const gpx =
     `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1"
-     creator="StravaGPX"
+     creator="Garmin Connect"
      xmlns="http://www.topografix.com/GPX/1/1"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"

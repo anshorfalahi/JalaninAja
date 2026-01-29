@@ -16,6 +16,9 @@ export function buildGPXFile(runData, route, type = "run") {
   const name = runData.name || (type === "run" ? `Run ${date}` : `Ride ${date}`);
   const description = runData.description || "";
 
+  // Use user-selected creator or default to Garmin Connect if missing
+  const creator = runData.creator || "Garmin Connect";
+
   let pace = parseFloat(runData.pace);
   let paceUnit = runData.paceUnit || (type === "run" ? "min/km" : "km/h");
   let distance = getTotalDistance(interpolatedRoute);
@@ -78,11 +81,11 @@ export function buildGPXFile(runData, route, type = "run") {
       </trkpt>`;
   }
 
-  // Attempt to look like Garmin Connect to get Strava to respect the file more
+  // Use the dynamic creator variable
   const gpx =
     `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1"
-     creator="Garmin Connect"
+     creator="${escapeXml(creator)}"
      xmlns="http://www.topografix.com/GPX/1/1"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"

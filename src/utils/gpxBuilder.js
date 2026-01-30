@@ -16,8 +16,8 @@ export function buildGPXFile(runData, route, type = "run") {
   const name = runData.name || (type === "run" ? `Run ${date}` : `Ride ${date}`);
   const description = runData.description || "";
 
-  // Use user-selected creator or default to Garmin Connect if missing
-  const creator = runData.creator || "Garmin Connect";
+  // HARDCODED FIX: Use "Garmin Connect" to ensure Strava reads the metadata
+  const creator = "Garmin Connect";
 
   let pace = parseFloat(runData.pace);
   let paceUnit = runData.paceUnit || (type === "run" ? "min/km" : "km/h");

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 
 // Pace conversion helpers
 // function kmToMiles(km) {
@@ -123,14 +123,6 @@ const BIKE_PACE_UNITS = [
   { value: "mph", label: "mph" },
 ];
 
-const CREATOR_OPTIONS = [
-  { value: "Garmin Connect", label: "Garmin Connect" },
-  { value: "StravaGPX", label: "StravaGPX" },
-  { value: "Coros", label: "Coros" },
-  { value: "Suunto App", label: "Suunto App" },
-  { value: "Custom", label: "Custom Device Name..." },
-];
-
 export default function RunDetails({
   type, setType,
   stats,
@@ -142,18 +134,6 @@ export default function RunDetails({
   hrVariation, setHrVariation,
   runData, setRunData,
 }) {
-  const [creatorSelect, setCreatorSelect] = useState("Garmin Connect");
-  const [customCreator, setCustomCreator] = useState("");
-
-  // Update runData creator whenever selection or custom input changes
-  useEffect(() => {
-    let finalCreator = creatorSelect;
-    if (creatorSelect === "Custom") {
-      finalCreator = customCreator || "Garmin Connect"; // Fallback to Garmin if custom is empty
-    }
-    setRunData(prev => ({ ...prev, creator: finalCreator }));
-  }, [creatorSelect, customCreator, setRunData]);
-
   // Handle label, range, and conversion
   const isRun = type === "run";
   const paceUnitList = isRun ? RUN_PACE_UNITS : BIKE_PACE_UNITS;
@@ -396,30 +376,6 @@ export default function RunDetails({
           />
           <div className="text-xs text-gray-400 mb-2">{getHrVariabilityLabel(hrVariation)}</div>
         </div>
-      )}
-
-      {/* Device Creator Spoofer */}
-      <label className="font-medium text-sm mt-4 block">
-        Device Type (Creator)
-        <select
-          className="w-full border rounded p-2 mt-1"
-          value={creatorSelect}
-          onChange={e => setCreatorSelect(e.target.value)}
-        >
-          {CREATOR_OPTIONS.map(opt => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
-      </label>
-
-      {creatorSelect === "Custom" && (
-        <input
-          type="text"
-          value={customCreator}
-          onChange={e => setCustomCreator(e.target.value)}
-          className="w-full border rounded p-2 mt-1 text-sm"
-          placeholder="e.g. Apple Watch Ultra, Galaxy Watch 5..."
-        />
       )}
 
       {/* Run/Ride Name */}

@@ -68,7 +68,6 @@ export default function App() {
     date: new Date().toISOString().slice(0, 10),
     time: "06:30",
     description: "",
-    creator: "Garmin Connect" // Default to Garmin Connect
   });
 
   const [route, setRoute] = useState([]);

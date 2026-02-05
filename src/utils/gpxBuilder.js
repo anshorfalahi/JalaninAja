@@ -6,10 +6,18 @@ export function buildGPXFile(runData, route, type = "run") {
   // Ideal: 1 titik per 10 meter
   const interpolatedRoute = interpolateRoute(route, 10); // meter
 
-  const name = runData.name || (type === "run" ? "Run" : "Ride");
   const date = runData.date || new Date().toISOString().slice(0, 10);
   const time = runData.time || "06:30";
-  const startDateTime = new Date(`${date}T${time}:00Z`);
+
+  // Fix 1: Treat input time as local time (remove 'Z') to preserve user's timezone intent
+  const startDateTime = new Date(`${date}T${time}:00`);
+
+  // Fix 3: Improve name fallback to include date so it's not just "Run"
+  const name = runData.name || (type === "run" ? `Run ${date}` : `Ride ${date}`);
+  const description = runData.description || "";
+
+  // HARDCODED FIX: Use "Garmin Connect" to ensure Strava reads the metadata
+  const creator = "Garmin Connect";
 
   let pace = parseFloat(runData.pace);
   let paceUnit = runData.paceUnit || (type === "run" ? "min/km" : "km/h");
@@ -42,8 +50,23 @@ export function buildGPXFile(runData, route, type = "run") {
 
     let hrVal = avgHR;
     if (includeHR) {
-      const variation = Math.round((avgHR * hrVariation / 100) * Math.sin(i / 8));
-      hrVal = avgHR + variation;
+      // Fix 2: More realistic HR variability (Trend + Noise)
+      // Low frequency trend (terrain/fatigue simulation)
+      const trend = Math.sin(i / 20) + Math.sin(i / 5) * 0.5;
+      // High frequency noise (jitter)
+      const jitter = (Math.random() - 0.5) * 1.5;
+
+      // Scale by hrVariation (percentage of avgHR)
+      const maxDelta = avgHR * (hrVariation / 100);
+
+      // Calculate final variation
+      // Normalize roughly and apply
+      const variation = (trend + jitter) / 1.5 * maxDelta;
+
+      hrVal = Math.round(avgHR + variation);
+      // Ensure HR is within sane bounds
+      if (hrVal < 30) hrVal = 30;
+      if (hrVal > 250) hrVal = 250;
     }
 
     pointsXml += `
@@ -58,10 +81,11 @@ export function buildGPXFile(runData, route, type = "run") {
       </trkpt>`;
   }
 
+  // Use the dynamic creator variable
   const gpx =
     `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1"
-     creator="GPX Generator"
+     creator="${escapeXml(creator)}"
      xmlns="http://www.topografix.com/GPX/1/1"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
@@ -71,12 +95,13 @@ export function buildGPXFile(runData, route, type = "run") {
      http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd">
   <metadata>
     <name>${escapeXml(name)}</name>
-    <desc>${escapeXml(runData.description || "")}</desc>
+    <desc>${escapeXml(description)}</desc>
     <time>${startDateTime.toISOString()}</time>
   </metadata>
   <trk>
     <name>${escapeXml(name)}</name>
-    <type>${type === "run" ? "Run" : "Ride"}</type>
+    <desc>${escapeXml(description)}</desc>
+    <type>${type === "run" ? "running" : "cycling"}</type>
     <trkseg>
       ${pointsXml}
     </trkseg>
